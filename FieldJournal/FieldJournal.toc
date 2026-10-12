@@ -1,0 +1,13 @@
+## Interface: 16001, 120100
+## Title: Field Journal
+## Notes: An in-character journal: notes, encounters, places, quest thoughts and a chronicle of your days.
+## Author: Mathias
+## Version: 0.4.0
+## SavedVariablesPerCharacter: FieldJournalDB
+## IconTexture: Interface\Icons\INV_Misc_Book_09
+## AddonCompartmentFunc: FieldJournal_OnAddonCompartmentClick
+
+Core.lua
+Features.lua
+UI.lua
+Pin.lua

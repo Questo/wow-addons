@@ -1,0 +1,9 @@
+## Interface: 16001, 120100
+## Title: Icon Finder
+## Notes: Adds a search box to the macro icon picker. Search by spell or item name, or type an icon ID.
+## Author: Mathias
+## Version: 0.2.0
+## SavedVariables: IconFinderDB
+## IconTexture: Interface\Icons\INV_Misc_Spyglass_03
+
+Core.lua

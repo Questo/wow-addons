@@ -1,0 +1,10 @@
+## Interface: 16001, 120100
+## Title: Immersive UI
+## Notes: Hides chosen UI elements until you are in combat or have a target.
+## Author: Mathias
+## Version: 0.2.0
+## IconTexture: Interface\Icons\Spell_Nature_Invisibilty
+## SavedVariables: ImmersiveUIDB
+
+Config.lua
+Core.lua

@@ -1,0 +1,11 @@
+# Release zips are built from the folders, so keep them out of git
+*.zip
+
+# OS and editor clutter
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*~

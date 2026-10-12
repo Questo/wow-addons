@@ -1,0 +1,14 @@
+<Bindings>
+	<Binding name="FIELDJOURNAL_TOGGLE" header="FIELDJOURNAL" category="ADDONS">
+		FieldJournal_Toggle()
+	</Binding>
+	<Binding name="FIELDJOURNAL_ADDTARGET" category="ADDONS">
+		FieldJournal_AddTarget()
+	</Binding>
+	<Binding name="FIELDJOURNAL_MARKPLACE" category="ADDONS">
+		FieldJournal_MarkPlace()
+	</Binding>
+	<Binding name="FIELDJOURNAL_MUSEQUEST" category="ADDONS">
+		FieldJournal_MuseQuest()
+	</Binding>
+</Bindings>

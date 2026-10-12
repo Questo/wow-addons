@@ -1,0 +1,9 @@
+## Interface: 16001, 120100
+## Title: Window Mover
+## Notes: Adds a small drag handle to your bags, character pane, spellbook and talents, map and quest log, collections and professions so you can move them. Positions are remembered.
+## Author: Mathias
+## Version: 0.2.0
+## IconTexture: Interface\Icons\INV_Misc_Bag_10
+## SavedVariables: WindowMoverDB
+
+Core.lua

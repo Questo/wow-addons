@@ -1,0 +1,9 @@
+## Interface: 16001, 120100
+## Title: Keepsakes
+## Notes: Star items you want to keep. Starred items ask before they're sold and can't be deleted until you unstar them.
+## Author: Mathias
+## Version: 0.2.0
+## IconTexture: Interface\Icons\INV_Jewelry_Necklace_07
+## SavedVariables: KeepsakesDB
+
+Core.lua
