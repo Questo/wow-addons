@@ -19,14 +19,22 @@ A small collection of World of Warcraft addons built for WoW Forever (interface 
 2. Fully restart the game. A brand new addon is not picked up by `/reload`.
 3. Check the addon is enabled in the AddOns list on the character select screen.
 
-If you used the old **Who Has It** addon, delete its folder: Character Ledger replaces it and `/whohas` still works.
-
 ## Making release zips
 
-From the repository root, zip each addon folder on its own, for example:
+From the repository root, zip each addon folder on its own. Each zip holds the folder itself, so it unzips to `FieldJournal/FieldJournal.toc` and so on.
+
+On macOS or Linux:
 
 ```sh
 for a in */; do zip -r "${a%/}.zip" "${a%/}"; done
+```
+
+On Windows, in PowerShell:
+
+```powershell
+Get-ChildItem -Directory | ForEach-Object {
+    Compress-Archive -Path $_.FullName -DestinationPath "$($_.Name).zip" -Force
+}
 ```
 
 Zips are ignored by git (see `.gitignore`).
