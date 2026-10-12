@@ -1,0 +1,5 @@
+<Bindings>
+	<Binding name="EMOTEWHEEL_TOGGLE" header="EMOTEWHEEL" category="ADDONS">
+		EmoteWheel_Toggle()
+	</Binding>
+</Bindings>

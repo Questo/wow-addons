@@ -270,14 +270,14 @@ SlashCmdList.CHARACTERLEDGER = function(msg)
 	cmd = cmd:lower()
 	if cmd == "" then
 		ns.Toggle("chars")
-	elseif cmd == "items" or cmd == "recipes" or cmd == "lockouts" or cmd == "mail" then
+	elseif cmd == "items" or cmd == "recipes" or cmd == "lockouts" or cmd == "mail" or cmd == "loot" then
 		ns.Open(cmd, rest)
 	elseif cmd == "forget" and rest ~= "" then
 		ns.Forget(rest)
 	elseif cmd == "tooltip" then
 		ns.SetTooltip(not db.tooltip)
 	else
-		say("/ledger opens the ledger. /ledger items <name> or /ledger recipes <name> searches, /ledger lockouts shows lockouts, /ledger mail shows mail.")
+		say("/ledger opens the ledger. /ledger items <name> or /ledger recipes <name> searches, /ledger lockouts shows lockouts, /ledger mail shows mail, /ledger loot <text> searches the loot log.")
 		print("   /ledger forget <name> removes a character, /ledger tooltip turns tooltip counts off and on.")
 	end
 end

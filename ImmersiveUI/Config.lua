@@ -8,6 +8,7 @@ local _, ns = ...
 -- messages, on mouseover and while typing (used for chat).
 -- recovery = true means the group also stays visible out of combat while your
 -- health (or mana) is below full, so you can see when to eat or drink.
+-- partyHurt = true means the group also shows while someone in your party is hurt.
 -- Minimap and the quest/objective tracker are never touched.
 ns.groups = {
 	{ key = "bar1",   label = "Action bar 1",    enabled = true, hoverOnly = true,  frames = { { "MainActionBar", "MainMenuBar" } } },
@@ -16,7 +17,7 @@ ns.groups = {
 	{ key = "bar4",   label = "Action bar 4",    enabled = false, hoverOnly = true, frames = { { "MultiBarRight" } } },
 	{ key = "extra",  label = "Stance/pet bars", enabled = true, hoverOnly = true,  frames = { { "StanceBar" }, { "PetActionBar" } } },
 	{ key = "player", label = "Player frame",    enabled = true,  recovery = true, frames = { { "PlayerFrame" } } },
-	{ key = "party",  label = "Party frames",    enabled = true,  frames = { { "PartyFrame" }, { "CompactPartyFrame" } } },
+	{ key = "party",  label = "Party frames",    enabled = true,  partyHurt = true, frames = { { "PartyFrame" }, { "CompactPartyFrame" } } },
 	{ key = "menu",   label = "Main menu",       enabled = true,  frames = { { "MicroMenuContainer", "MicroButtonAndBagsBar" } } },
 	{ key = "bags",   label = "Bag bar",         enabled = true,  frames = { { "BagsBar" } } },
 	{ key = "xp",     label = "XP/rep bars",     enabled = true,  frames = { { "StatusTrackingBarManager" } } },
@@ -39,6 +40,7 @@ ns.defaults = {
 	mouseover = true,     -- hovering a hidden element reveals it
 	hostileOnly = false,  -- only count targets you can attack
 	recovery = true,      -- player frame stays up while health/mana is below full
+	partyHurt = true,     -- party frames show while a party member is hurt
 	groups = {},          -- per-group enabled overrides, set via /iui toggle
 	hoverOnly = {},       -- per-group hoverOnly overrides, set via /iui hover
 }

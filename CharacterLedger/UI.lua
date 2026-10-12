@@ -56,23 +56,24 @@ end
 
 -- Views -----------------------------------------------------------------------
 
-local VIEWS, ORDER = {}, { "chars", "items", "recipes", "lockouts", "mail" }
+local VIEWS, ORDER = {}, { "chars", "items", "recipes", "lockouts", "mail", "loot" }
 
 local MAIL_ICON = "|TInterface\\Icons\\INV_Letter_15:14:14|t "
 
 VIEWS.chars = {
 	label = "Characters",
 	cols = {
-		{ "Character", 0, 190, "LEFT" },
-		{ "Level", 195, 40, "CENTER" },
-		{ "Item level", 240, 60, "CENTER" },
-		{ "Gold", 305, 120, "RIGHT" },
-		{ "Rested", 440, 70, "CENTER" },
-		{ "Professions", 515, 135, "LEFT" },
-		{ "Last seen", 655, 125, "LEFT" },
+		{ "Character", 0, 170, "LEFT" },
+		{ "Level", 172, 36, "CENTER" },
+		{ "Item level", 210, 56, "CENTER" },
+		{ "Gold", 268, 110, "RIGHT" },
+		{ "Rested", 384, 56, "CENTER" },
+		{ "Played", 444, 66, "CENTER" },
+		{ "Professions", 516, 120, "LEFT" },
+		{ "Last seen", 640, 110, "LEFT" },
 	},
 	build = function()
-		local rows, me, totalGold = {}, ns.Me(), 0
+		local rows, me, totalGold, totalPlayed = {}, ns.Me(), 0, 0
 		local chars = ns.Characters()
 		for _, char in ipairs(chars) do
 			local rested
@@ -84,15 +85,25 @@ VIEWS.chars = {
 			end
 			local profs = {}
 			for _, p in ipairs(char.professions or {}) do table.insert(profs, p.name .. " " .. p.rank) end
+			local played, atLevel = ns.Played(char)
+			totalPlayed = totalPlayed + (played or 0)
 			local seen = char == me and "|cff00ff00Playing now|r" or ((char.zone or "") .. "  |cff999999" .. ago(char.lastSeen) .. "|r")
 			table.insert(rows, {
-				cells = { (ns.HasMail(char) and MAIL_ICON or "") .. ns.ColoredName(char), char.level or "?", char.ilvl or "", goldText(char.money), rested, table.concat(profs, ", "), seen },
+				cells = { (ns.HasMail(char) and MAIL_ICON or "") .. ns.ColoredName(char), char.level or "?", char.ilvl or "", goldText(char.money), rested, played and ns.PlayedText(played) or "|cff999999?|r", table.concat(profs, ", "), seen },
 				tooltip = function(owner)
 					GameTooltip:SetOwner(owner, "ANCHOR_RIGHT")
 					GameTooltip:AddLine(ns.ColoredName(char))
 					if char.zone then
 						local where = char.subzone and char.subzone ~= "" and (char.subzone .. ", " .. char.zone) or char.zone
 						GameTooltip:AddDoubleLine("Location", where, 1, 0.82, 0, 1, 1, 1)
+					end
+					if played then
+						GameTooltip:AddDoubleLine("Played", ns.PlayedText(played), 1, 0.82, 0, 1, 1, 1)
+						if atLevel then
+							GameTooltip:AddDoubleLine("At this level", ns.PlayedText(atLevel), 1, 0.82, 0, 1, 1, 1)
+						end
+					else
+						GameTooltip:AddLine("Played time is read the next time you log in on this character.", 0.6, 0.6, 0.6, true)
 					end
 					if char.level and char.xp and char.xpMax and char.xpMax > 0 and char.level < ns.MaxLevel() then
 						GameTooltip:AddDoubleLine("XP", math.floor(char.xp / char.xpMax * 100) .. "% of level " .. char.level, 1, 0.82, 0, 1, 1, 1)
@@ -116,7 +127,7 @@ VIEWS.chars = {
 			})
 			totalGold = totalGold + (char.money or 0)
 		end
-		return rows, #chars .. " characters    Total gold: " .. goldText(totalGold)
+		return rows, #chars .. " characters    Total gold: " .. goldText(totalGold) .. "    Total played: " .. ns.PlayedText(totalPlayed)
 	end,
 }
 
@@ -324,6 +335,68 @@ VIEWS.mail = {
 	end,
 }
 
+local function charName(key)
+	local char = key and ns.DB().chars[key]
+	return char and ns.ColoredName(char) or (key and key:match("^[^-]+") or "")
+end
+
+local function lootTime(t)
+	if date("%Y%m%d", t) == date("%Y%m%d") then return "today " .. date("%H:%M", t) end
+	return date("%d %b %Y", t)
+end
+
+local MAX_LOOT_SHOWN = 500
+
+VIEWS.loot = {
+	label = "Loot",
+	search = "Search loot, places, sources...",
+	icon = true,
+	cols = {
+		{ "Item", 0, 220, "LEFT" },
+		{ "Qty", 222, 36, "RIGHT" },
+		{ "From", 266, 160, "LEFT" },
+		{ "Where", 430, 150, "LEFT" },
+		{ "Who", 584, 80, "LEFT" },
+		{ "When", 666, 84, "LEFT" },
+	},
+	build = function(q)
+		local rows, total = {}, 0
+		for _, e in ipairs(ns.LootEntries()) do
+			local from = e.src or ""
+			if e.how then from = from ~= "" and (from .. " |cff999999(" .. e.how .. ")|r") or e.how end
+			local where = (e.sub and e.sub ~= "" and e.sub ~= e.zone) and (e.sub .. ", " .. (e.zone or "")) or (e.zone or "")
+			local hay = (e.name .. "\n" .. (e.src or "") .. "\n" .. (e.how or "") .. "\n" .. where .. "\n" .. (e.char or "")):lower()
+			if q == "" or hay:find(q, 1, true) then
+				total = total + 1
+				if #rows < MAX_LOOT_SHOWN then
+					table.insert(rows, {
+						icon = C_Item.GetItemIconByID(e.id),
+						cells = { qualityName(e.id, e.name), e.qty or 1, from, where, charName(e.char), lootTime(e.t) },
+						tooltip = function(owner)
+							GameTooltip:SetOwner(owner, "ANCHOR_RIGHT")
+							GameTooltip:SetHyperlink(e.link)
+							GameTooltip:AddLine(" ")
+							GameTooltip:AddLine("Looted " .. date("%d %b %Y, %H:%M", e.t) .. " by " .. charName(e.char), 0.6, 0.6, 0.6)
+							GameTooltip:Show()
+						end,
+						click = function()
+							if IsModifiedClick("CHATLINK") then ChatEdit_InsertLink(e.link) end
+						end,
+					})
+				end
+			end
+		end
+		local footer
+		if total > MAX_LOOT_SHOWN then
+			footer = "Showing the newest " .. MAX_LOOT_SHOWN .. " of " .. total .. ". Type to narrow it down."
+		elseif total > 0 then
+			footer = total .. " loot entries. The log keeps the newest 3000."
+		end
+		local empty = q == "" and "Nothing looted yet. Everything your characters loot from now on shows up here." or "No loot matching that."
+		return rows, footer, empty
+	end,
+}
+
 -- Rows ------------------------------------------------------------------------
 
 local function fontString(parent, fontObject)
@@ -513,7 +586,7 @@ local function create()
 	w.tabs = {}
 	local prev
 	for _, key in ipairs(ORDER) do
-		local tab = button(frame, VIEWS[key].label, 110)
+		local tab = button(frame, VIEWS[key].label, 106)
 		if prev then
 			tab:SetPoint("LEFT", prev, "RIGHT", 2, 0)
 		else

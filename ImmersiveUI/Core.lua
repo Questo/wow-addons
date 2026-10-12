@@ -100,6 +100,19 @@ local function isRecovering()
 	return false
 end
 
+-- True when anyone else in your party (not raid) is alive and below full health.
+local function isPartyHurt()
+	if IsInRaid() then return false end
+	for i = 1, 4 do
+		local unit = "party" .. i
+		if UnitExists(unit) and not UnitIsDeadOrGhost(unit) and UnitIsConnected(unit) then
+			local hp = fraction(UnitHealth(unit), UnitHealthMax(unit))
+			if hp and hp < 1 then return true end
+		end
+	end
+	return false
+end
+
 local function isTyping()
 	for i = 1, (NUM_CHAT_WINDOWS or 10) do
 		local box = _G["ChatFrame" .. i .. "EditBox"]
@@ -117,6 +130,7 @@ end
 
 local driver = CreateFrame("Frame")
 local recovering = false
+local partyHurt = false
 
 local mouseTimer = 0
 driver:SetScript("OnUpdate", function(_, elapsed)
@@ -125,7 +139,10 @@ driver:SetScript("OnUpdate", function(_, elapsed)
 	if checkMouse then mouseTimer = 0 end
 
 	local showAll = active or inEditMode() or (GetTime() - inactiveSince < db.fadeOutDelay)
-	if checkMouse then recovering = db.recovery and isRecovering() end
+	if checkMouse then
+		recovering = db.recovery and isRecovering()
+		partyHurt = db.partyHurt and isPartyHurt()
+	end
 
 	for _, group in ipairs(groups) do
 		local frames = resolve(group)
@@ -139,6 +156,7 @@ driver:SetScript("OnUpdate", function(_, elapsed)
 			else
 				shown = group.hover or inEditMode() or (showAll and not hoverOnly)
 					or (group.recovery and recovering and not hoverOnly)
+					or (group.partyHurt and partyHurt and not hoverOnly)
 			end
 			local target = shown and 1 or db.hiddenAlpha
 			local current = group.alpha or 1
@@ -231,6 +249,9 @@ SlashCmdList.IMMERSIVEUI = function(msg)
 	elseif cmd == "recovery" then
 		db.recovery = not db.recovery
 		say("Player frame stays up while recovering " .. onOff(db.recovery))
+	elseif cmd == "party" then
+		db.partyHurt = not db.partyHurt
+		say("Party frames show while someone is hurt " .. onOff(db.partyHurt))
 	elseif cmd == "alpha" and tonumber(arg) then
 		db.hiddenAlpha = math.max(0, math.min(1, tonumber(arg)))
 		say("Hidden alpha set to " .. db.hiddenAlpha)
@@ -252,6 +273,7 @@ SlashCmdList.IMMERSIVEUI = function(msg)
 		print("  /iui mouseover - reveal hidden elements on hover")
 		print("  /iui hostile - only hostile targets reveal the UI")
 		print("  /iui recovery - keep the player frame up until health/mana is full")
+		print("  /iui party - show party frames while a party member is hurt")
 		print("  /iui alpha <0-1> - how visible hidden elements are")
 		print("  /iui delay <seconds> - wait before fading out")
 		print("  /iui chat <seconds> - how long chat stays after a new message")

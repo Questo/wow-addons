@@ -344,6 +344,8 @@ SlashCmdList.FIELDJOURNAL = function(msg)
 	elseif cmd == "auto" then
 		ns.db.chronicleOn = not ns.db.chronicleOn
 		say("Automatic chronicle " .. (ns.db.chronicleOn and "|cff00ff00on|r" or "|cffff4444off|r"))
+	elseif cmd == "search" or cmd == "find" then
+		ns.Search(rest)
 	elseif cmd == "screenshots" or cmd == "shots" then
 		ns.db.screenshotsOn = not ns.db.screenshotsOn
 		say("Screenshot memories " .. (ns.db.screenshotsOn and "|cff00ff00on|r" or "|cffff4444off|r"))
@@ -363,6 +365,7 @@ SlashCmdList.FIELDJOURNAL = function(msg)
 		print("  /fj place - mark the spot you are standing on")
 		print("  /fj quest - write about the quest you have open or are following")
 		print("  /fj note <text> - jot down a quick new page")
+		print("  /fj search <words> - search every page in the journal")
 		print("  /fj notes, encounters, places, quests, chronicle - open a section")
 		print("  /fj auto - turn the automatic chronicle on/off")
 		print("  /fj screenshots - turn screenshot notes in the chronicle on/off")

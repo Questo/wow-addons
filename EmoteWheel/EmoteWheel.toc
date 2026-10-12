@@ -1,0 +1,10 @@
+## Interface: 16001, 120100
+## Title: Emote Wheel
+## Notes: A ring of emotes, your own emote macros and custom /e lines around the cursor. Bind a key, click a slot.
+## Author: Mathias
+## Version: 0.1.2
+## SavedVariables: EmoteWheelDB
+## IconTexture: Interface\Icons\INV_Misc_Toy_10
+## AddonCompartmentFunc: EmoteWheel_Toggle
+
+Core.lua

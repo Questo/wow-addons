@@ -162,14 +162,16 @@ local function section() return SECTIONS[mode] end
 local function list() return ns.db[mode] end
 local function titleOf(e) return e[section().titleField] end
 
-local function matches(e)
+local function matchesIn(e, key)
 	if filter == "" then return true end
-	local text = (titleOf(e) or "") .. "\n" .. (e.body or "")
-	local folder = mode == "notes" and ns.FolderById(e.folder)
+	local text = (e[SECTIONS[key].titleField] or "") .. "\n" .. (e.body or "")
+	local folder = key == "notes" and ns.FolderById(e.folder)
 	if folder then text = text .. "\n" .. folder.name end
 	text = text:lower()
 	return text:find(filter, 1, true) ~= nil
 end
+
+local function matches(e) return matchesIn(e, mode) end
 
 local function sorted()
 	local out = {}
@@ -203,6 +205,13 @@ local FOLDER_H = 24
 
 local function onRowClick(self, button)
 	clearFocus()
+	if self.header then return end
+	if self.other then
+		-- A match in another section: go there, keeping the search.
+		ns.SetMode(self.other, true)
+		ns.Select(self.entry)
+		return
+	end
 	if self.folder then
 		if button == "RightButton" then
 			folderMenu(self.folder, self)
@@ -264,14 +273,38 @@ local function sortedFolders()
 	return out
 end
 
+-- While searching, matches from the other sections follow under a heading,
+-- as { entry = e, other = sectionKey }.
+local function addOthers(items)
+	if filter == "" then return end
+	local first = true
+	for _, key in ipairs(ORDER) do
+		if key ~= mode then
+			local found = {}
+			for _, e in ipairs(ns.db[key]) do
+				if matchesIn(e, key) then table.insert(found, e) end
+			end
+			table.sort(found, SECTIONS[key].sort)
+			for _, e in ipairs(found) do
+				if first then
+					table.insert(items, { header = "In other sections" })
+					first = false
+				end
+				table.insert(items, { entry = e, other = key })
+			end
+		end
+	end
+end
+
 -- What the list shows: { entry = e, indent = bool } or { folder = f, count = n }.
 -- Notes are grouped under their folders, loose pages after them. While
 -- searching, folders open up and empty ones are left out.
 local function listItems()
 	local entries = sorted()
+	local items = {}
 	if mode ~= "notes" then
-		local items = {}
 		for _, e in ipairs(entries) do table.insert(items, { entry = e }) end
+		addOthers(items)
 		return items, #entries
 	end
 	local byFolder, loose = {}, {}
@@ -283,7 +316,6 @@ local function listItems()
 			table.insert(loose, e)
 		end
 	end
-	local items = {}
 	for _, f in ipairs(sortedFolders()) do
 		local notes = byFolder[f.id] or {}
 		if filter == "" or #notes > 0 then
@@ -294,6 +326,7 @@ local function listItems()
 		end
 	end
 	for _, e in ipairs(loose) do table.insert(items, { entry = e }) end
+	addOthers(items)
 	return items, #entries
 end
 
@@ -304,11 +337,32 @@ function ns.RefreshList()
 	local y = 0
 	for i, item in ipairs(items) do
 		local row = getRow(i)
-		row.entry, row.folder = item.entry, item.folder
+		row.entry, row.folder, row.other, row.header = item.entry, item.folder, item.other, item.header
 		row:ClearAllPoints()
 		row:SetPoint("TOPLEFT", 0, -y)
 		row.text:ClearAllPoints()
-		if item.folder then
+		ink(row.text)
+		if item.header then
+			row:SetHeight(FOLDER_H)
+			row.icon:Hide()
+			row.text:SetPoint("LEFT", 6, -2)
+			row.text:SetPoint("RIGHT", -4, 0)
+			row.text:SetText(item.header)
+			ink(row.text, FAINT)
+			row.sub:Hide()
+			row.sel:Hide()
+		elseif item.other then
+			local e, other = item.entry, SECTIONS[item.other]
+			row:SetHeight(ROW_H)
+			row.icon:Hide()
+			row.text:SetPoint("TOPLEFT", 6, -4)
+			row.text:SetPoint("RIGHT", -4, 0)
+			local title = e[other.titleField]
+			row.text:SetText((title and title ~= "") and title or "(untitled)")
+			row.sub:SetText(other.label .. " - " .. other.sub(e))
+			row.sub:Show()
+			row.sel:Hide()
+		elseif item.folder then
 			local f = item.folder
 			row:SetHeight(FOLDER_H)
 			local open = not f.collapsed or filter ~= ""
@@ -338,6 +392,10 @@ function ns.RefreshList()
 	w.listChild:SetHeight(math.max(1, y))
 
 	w.emptyList:SetShown(#items == 0)
+	if matched == 0 and #items > 0 then
+		-- Nothing here, but other sections have matches: say so above the heading.
+		w.emptyList:SetShown(false)
+	end
 	w.emptyList:SetText((#list() == 0 or matched == 0 and filter == "") and s.empty or "Nothing matches.")
 end
 
@@ -389,11 +447,14 @@ function ns.EntryChanged(e)
 	ns.RefreshList()
 end
 
-function ns.SetMode(m)
+-- keepSearch leaves the search text in place (jumping to a match elsewhere).
+function ns.SetMode(m, keepSearch)
 	mode = m
 	clearFocus()
-	w.search:SetText("")
-	filter = ""
+	if not keepSearch then
+		w.search:SetText("")
+		filter = ""
+	end
 	for key, tab in pairs(w.tabs) do tab:SetEnabled(key ~= m) end
 	for key, s in pairs(SECTIONS) do
 		for _, b in ipairs(s.widgets) do b:SetShown(key == m) end
@@ -413,7 +474,7 @@ function ns.SetMode(m)
 	if not e then
 		local items = listItems()
 		for _, item in ipairs(items) do
-			if item.entry then e = item.entry break end
+			if item.entry and not item.other then e = item.entry break end
 		end
 	end
 	ns.Select(e)
@@ -666,7 +727,7 @@ local function create()
 	local hint = w.search:CreateFontString(nil, "OVERLAY")
 	hint:SetFontObject(font("GameFontDisableSmall", "GameFontNormalSmall"))
 	hint:SetPoint("LEFT", 2, 0)
-	hint:SetText("Search...")
+	hint:SetText("Search all pages...")
 	w.search:SetScript("OnTextChanged", function(self)
 		filter = strtrim(self:GetText()):lower()
 		hint:SetShown(self:GetText() == "")
@@ -861,6 +922,16 @@ local function create()
 end
 
 -- Public --------------------------------------------------------------------
+
+-- Opens the journal with a search across every section.
+function ns.Search(text)
+	if not ns.db then return end
+	if not frame then create() end
+	frame:Show()
+	ns.SetMode(mode)
+	w.search:SetText(text or "")
+	w.search:SetFocus()
+end
 
 function ns.Toggle()
 	if not ns.db then return end

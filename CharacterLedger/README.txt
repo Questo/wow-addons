@@ -1,4 +1,4 @@
-Character Ledger 0.3.0
+Character Ledger 0.5.0
 
 Install
 1. Quit the game completely (a /reload does not pick up a new addon).
@@ -20,8 +20,11 @@ Getting started
 
 Use
 - /ledger (or the addon button by the minimap) opens the ledger.
-- Characters tab: level, item level, gold, rested XP, professions and where
-  you left each character. Hover a row for more detail. Rested XP for other
+- Characters tab: level, item level, gold, rested XP, played time, professions
+  and where you left each character. The footer adds up gold and played time
+  for all of them. Hover a row to also see time played at the current level.
+  Played time is read a few seconds after you log in on each character
+  (without the usual /played lines in chat). Hover a row for more detail. Rested XP for other
   characters is estimated from the time since you logged out.
 - Items tab: type part of an item name to see who has it and how many.
   Hover an item for its tooltip, shift-click to link it in chat.
@@ -37,11 +40,18 @@ Use
   next to a name on the Characters tab means that character has mail waiting.
   When you log in, chat warns you if any character has mail with items or gold
   that runs out within 3 days (it would be sent back or lost).
+- Loot tab: everything your characters loot, newest first: the item, how
+  many, where it came from (the creature, the node you mined or picked, a
+  chest, fishing), the zone, which character and when. Quest rewards and other
+  items handed to you say "Received", things you make say "Crafted".
+  Type in the search box to look through items, sources, zones and names.
+  Hover an entry for the item, shift-click to link it in chat. The log keeps
+  the newest 3000 entries and starts recording from this version on.
 - Item tooltips (off by default): tick "Show in item tooltips" at the bottom
   of the ledger window, or type /ledger tooltip, and item tooltips list who
   has the item (bags, bank, equipped, warband bank and a total), who can craft
   it ("Crafted by") and whose recipes use it ("Used by").
-- /ledger recipes <name>, /ledger lockouts and /ledger mail open those tabs directly.
+- /ledger recipes <name>, /ledger lockouts, /ledger mail and /ledger loot <name> open those tabs directly.
 - /whohas <item> opens the Items tab searching for that item.
 - /ledger forget <name> removes a character you deleted.
 - /ledger tooltip turns the tooltip lines on and off.

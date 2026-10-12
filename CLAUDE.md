@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Six independent World of Warcraft addons for **WoW: Forever**, each in its own top-level folder (CharacterLedger, FieldJournal, IconFinder, ImmersiveUI, Keepsakes, WindowMover). They share no code; each folder is installed on its own into `Interface/AddOns/`. Plain Lua frames, no libraries (no Ace3/LibStub) and no XML other than `FieldJournal/Bindings.xml`.
+Seven independent World of Warcraft addons for **WoW: Forever**, each in its own top-level folder (CharacterLedger, EmoteWheel, FieldJournal, IconFinder, ImmersiveUI, Keepsakes, WindowMover). They share no code; each folder is installed on its own into `Interface/AddOns/`. Plain Lua frames, no libraries (no Ace3/LibStub) and no XML other than the `Bindings.xml` files in FieldJournal and EmoteWheel.
 
 ## Build, test, release
 

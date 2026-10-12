@@ -1,8 +1,8 @@
 ## Interface: 16001, 120100
 ## Title: Character Ledger
-## Notes: An overview of all your characters (level, gold, rested XP, professions, where you left them), who has which items, who can craft what, and raid and dungeon lockouts, and mail waiting at the mailbox.
+## Notes: An overview of all your characters (level, gold, rested XP, played time, professions, where you left them), who has which items, who can craft what, and raid and dungeon lockouts, mail waiting at the mailbox, and a log of everything you loot.
 ## Author: Mathias
-## Version: 0.3.0
+## Version: 0.5.0
 ## IconTexture: Interface\Icons\INV_Misc_Note_05
 ## SavedVariables: CharacterLedgerDB
 ## AddonCompartmentFunc: CharacterLedger_OnAddonCompartmentClick
@@ -10,4 +10,6 @@
 Data.lua
 Extras.lua
 Mail.lua
+Played.lua
+Loot.lua
 UI.lua
